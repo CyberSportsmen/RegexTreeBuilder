@@ -61,6 +61,7 @@ def citesteTransitions(lines):
             left = left.strip()
             middle = middle.strip()
             right = right.strip()
+            # TODO: CHECK NFA si sa apartina states si sigma
             if transitions.get(left, None) == None:
                 transitions[left] = [(middle, right)]
             else:
@@ -104,8 +105,19 @@ def citire(filename):
         else:
             states, startState, finalStates = verif
         transitions = citesteTransitions(linii[transitionsIndex:])
-
     return sigma, states, startState, finalStates, transitions
+
+# verificam daca limbajul este corect definit
+def verificare(sigma, states, startState, finalStates, transitions):
+    for transition in transitions:
+        if transition not in states:
+            return -1
+        for muchie, nod_nou in transitions[transition]:
+            if muchie not in sigma:
+                return -1
+            if nod_nou not in states:
+                return -1
+    return 1;
 
 def main():
     result = citire("dfa_config_file.txt")
@@ -113,6 +125,9 @@ def main():
         print("Automatul contine erori! Verificati mesajul anterior!")
         return
     sigma, states, startState, finalStates, transitions = result
+    if verificare(sigma, states, startState, finalStates, transitions) == -1:
+        print("Automatul contine erori! Verificati mesajul anterior!")
+        return
     print("Sigma:", sigma)
     print("States: ", states)
     print("startState: ", startState)
