@@ -112,11 +112,18 @@ def verificare(sigma, states, startState, finalStates, transitions):
     for transition in transitions:
         if transition not in states:
             return -1
+        v = []
         for muchie, nod_nou in transitions[transition]:
             if muchie not in sigma:
+                print(f"Automatul nu admite in limbaj cuvantul {muchie}")
                 return -1
             if nod_nou not in states:
+                print(f"Automatul nu contine starea {nod_nou}!")
                 return -1
+            v.append(muchie)
+        if (len(v) != len(set(v))):
+            print("Automatul este NFA!")
+            return -1
     return 1;
 
 def main():
