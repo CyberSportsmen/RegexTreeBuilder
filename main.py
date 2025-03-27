@@ -105,6 +105,8 @@ def citire(filename):
         else:
             states, startState, finalStates = verif
         transitions = citesteTransitions(linii[transitionsIndex:])
+    if finalStates == []:
+        return -1
     return sigma, states, startState, finalStates, transitions
 
 # verificam daca limbajul este corect definit
@@ -126,6 +128,26 @@ def verificare(sigma, states, startState, finalStates, transitions):
             return -1
     return 1;
 
+def DFS(actual_state, finalStates, transitions, visited):
+    visited[actual_state] = True
+    if actual_state in finalStates:
+        return 1
+    for symbol, next_state in transitions.get(actual_state, []):
+        # print(actual_state)
+        if next_state not in visited:
+            if DFS(next_state, finalStates, transitions, visited) == 1:
+                return 1
+    return 0
+
+
+def verificareAcceptance(startState, finalStates, transitions):
+    viz = {}
+    result = DFS(startState, finalStates, transitions, viz)
+    if result == 1:
+        return True
+    else:
+        return False
+
 def main():
     result = citire("dfa_config_file.txt")
     if result == -1:
@@ -135,11 +157,11 @@ def main():
     if verificare(sigma, states, startState, finalStates, transitions) == -1:
         print("Automatul contine erori! Verificati mesajul anterior!")
         return
-    print("Sigma:", sigma)
+    print("Sigma: ", sigma)
     print("States: ", states)
     print("startState: ", startState)
     print("finalStates: ", finalStates)
     print("transitions: ", transitions)
-
+    print(verificareAcceptance(startState, finalStates, transitions))
 if __name__ == '__main__':
     main()
