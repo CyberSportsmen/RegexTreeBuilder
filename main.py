@@ -49,8 +49,23 @@ def citesteStates(lines):
     return states, startState, finalStates
 
 def citesteTransitions(lines):
-    transitions = []
-
+    transitions = {}
+    for line in lines:
+        line = line.strip()
+        if line.startswith('#'):
+            continue
+        if line == "End":
+            break
+        if line != "Transitions:":
+            left, middle, right = line.split(",")
+            left = left.strip()
+            middle = middle.strip()
+            right = right.strip()
+            if transitions.get(left, None) == None:
+                transitions[left] = [(middle, right)]
+            else:
+                transitions[left].append((middle, right))
+    return transitions
 
 
 def citire(filename):
@@ -60,7 +75,7 @@ def citire(filename):
     finalStates = []
     # pentru fiecare nod
     # vedem ce muchii are, de forma transitions[nod_curent] = lista de tupluri de forma (cuvant_acceptat, nod_urmator)
-    transitions = []
+    transitions = {}
     sigmaIndex, statesIndex, trasitionsIndex = -1, -1, -1
     with open(filename) as f:
         linii = f.readlines()
@@ -82,13 +97,13 @@ def citire(filename):
         if sigmaIndex == -1 or statesIndex == -1 or transitionsIndex == -1: # clar una din ele nu este, aruncam o eroare
             print("Date introduse gresit, lipsesc field-urile Sigma/States/Transitions!")
             return -1
-        # else
         sigma = citesteSigma(linii[sigmaIndex:]) # aici nu avem erori daca mi-a fost transmis ca datele sunt corecte
         verif = citesteStates(linii[statesIndex:])
         if verif == -1:
             return -1
         else:
             states, startState, finalStates = verif
+        transitions = citesteTransitions(linii[transitionsIndex:])
 
     return sigma, states, startState, finalStates, transitions
 
