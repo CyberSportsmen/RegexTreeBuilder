@@ -2,6 +2,7 @@ Sigma:
 a
 b
 c
+c
 End
 #
 #

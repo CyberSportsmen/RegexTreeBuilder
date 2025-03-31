@@ -12,15 +12,15 @@
 
 def citesteSigma(lines):
     # parsam lines pana la end
-    sigma = []
+    sigma = set()
     for line in lines:
         line = line.strip()
-        if line.startswith('#'):
+        if len(line) == 0 or line.startswith('#'):
             continue
         elif line == "End":
             break
         elif line != "Sigma:":
-            sigma.append(line)
+            sigma.add(line)
     return sigma
 
 def citesteStates(lines):
@@ -29,11 +29,11 @@ def citesteStates(lines):
     finalStates = []
     for line in lines:
         line = line.strip()
-        if line.startswith('#'):
+        if len(line) == 0 or line.startswith('#'):
             continue
         elif line == "End":
             break
-        elif line != "States:":
+        elif line != "States:" and len(line) > 0:
             lineParse = line.split()
             states.append(lineParse[0].strip(',').strip())
             for token in lineParse: # verificam daca este start sau finish, pentru flag-uri respectiva
@@ -55,7 +55,7 @@ def citesteTransitions(lines):
     transitions = {}
     for line in lines:
         line = line.strip()
-        if line.startswith('#'):
+        if len(line) == 0 or line.startswith('#'):
             continue
         if line == "End":
             break
@@ -64,7 +64,6 @@ def citesteTransitions(lines):
             left = left.strip()
             middle = middle.strip()
             right = right.strip()
-            # TODO: CHECK NFA si sa apartina states si sigma
             if transitions.get(left, None) == None:
                 transitions[left] = [(middle, right)]
             else:
@@ -87,7 +86,7 @@ def citire(filename):
         for line in linii:
             line = line.strip()
             lineIndex += 1
-            if line[0] == "#":
+            if len(line) == 0 or line.startswith("#"):
                 continue
             else:
                 if line == "Sigma:":
