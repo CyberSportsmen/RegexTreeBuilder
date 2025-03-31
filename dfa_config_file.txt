@@ -6,12 +6,12 @@ End
 #
 #
 States:
-q0, S
+q0, S, F
 q1
 q2
-q3
-q4, F
-q5
+q3, F
+q4
+q5, F
 End
 #
 #

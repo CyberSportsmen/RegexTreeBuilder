@@ -46,7 +46,11 @@ def citesteStates(lines):
                     startState = lineParse[0].strip(',').strip()
                 if(token == "F"):
                     finalStates.append(lineParse[0].strip(',').strip())
+    if(startState == None):
+        print("Automatul nu contine niciun startState! (min allowed = 1, max allowed = 1)")
+        return -1
     return states, startState, finalStates
+
 
 def citesteTransitions(lines):
     transitions = {}
@@ -101,11 +105,13 @@ def citire(filename):
         sigma = citesteSigma(linii[sigmaIndex:]) # aici nu avem erori daca mi-a fost transmis ca datele sunt corecte
         verif = citesteStates(linii[statesIndex:])
         if verif == -1:
+            print("Intrare fisier stari invalida!")
             return -1
         else:
             states, startState, finalStates = verif
         transitions = citesteTransitions(linii[transitionsIndex:])
     if finalStates == []:
+        print("Automatul nu contine nici o stare finala!")
         return -1
     return sigma, states, startState, finalStates, transitions
 
@@ -113,6 +119,7 @@ def citire(filename):
 def verificare(sigma, states, startState, finalStates, transitions):
     for transition in transitions:
         if transition not in states:
+            print(f"Automatul nu contine starea {transition}")
             return -1
         v = []
         for muchie, nod_nou in transitions[transition]:
@@ -125,7 +132,7 @@ def verificare(sigma, states, startState, finalStates, transitions):
             v.append(muchie)
         if (len(v) != len(set(v))):
             print("Automatul este NFA!")
-            return -1
+            return 2
     return 1;
 
 def DFS(actual_state, finalStates, transitions, visited):
@@ -133,35 +140,54 @@ def DFS(actual_state, finalStates, transitions, visited):
     if actual_state in finalStates:
         return 1
     for symbol, next_state in transitions.get(actual_state, []):
-        # print(actual_state)
+        print(actual_state)
         if next_state not in visited:
             if DFS(next_state, finalStates, transitions, visited) == 1:
                 return 1
     return 0
 
 
-def verificareAcceptance(startState, finalStates, transitions):
+def verificareAcceptance(startState, finalStates, transitions, isNfa):
     viz = {}
     result = DFS(startState, finalStates, transitions, viz)
     if result == 1:
-        return True
+        if isNfa == 1:
+            return 2
+        return 1
     else:
-        return False
+        if isNfa == 0:
+            return -1
+        else:
+            return -2
+    return 0
 
 def main():
-    result = citire("dfa_config_file.txt")
+    result = citire("nfa_config_file.txt")
     if result == -1:
         print("Automatul contine erori! Verificati mesajul anterior!")
         return
     sigma, states, startState, finalStates, transitions = result
-    if verificare(sigma, states, startState, finalStates, transitions) == -1:
+    finalCheck = verificare(sigma, states, startState, finalStates, transitions)
+    if finalCheck == -1:
         print("Automatul contine erori! Verificati mesajul anterior!")
         return
+    isNfa = (finalCheck == 2)
+
     print("Sigma: ", sigma)
     print("States: ", states)
     print("startState: ", startState)
     print("finalStates: ", finalStates)
     print("transitions: ", transitions)
-    print(verificareAcceptance(startState, finalStates, transitions))
+    acceptance = verificareAcceptance(startState, finalStates, transitions, isNfa)
+    if  acceptance == 1:
+        print("Dfa Acceptat!")
+    elif acceptance == 2:
+        print("Nfa Acceptat!")
+    elif acceptance == -1:
+        print("Dfa Invalid!")
+    elif acceptance == -2:
+        print("Nfa Invalid!")
+    else:
+        print("Eroare!")
 if __name__ == '__main__':
     main()
