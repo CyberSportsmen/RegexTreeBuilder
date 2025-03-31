@@ -7,7 +7,7 @@ End
 #
 #
 States:
-q0, F
+q0, S
 q1
 q2
 q3

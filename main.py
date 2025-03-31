@@ -51,7 +51,6 @@ def citesteStates(lines):
         return -1
     return states, startState, finalStates
 
-
 def citesteTransitions(lines):
     transitions = {}
     for line in lines:
@@ -140,7 +139,6 @@ def DFS(actual_state, finalStates, transitions, visited):
     if actual_state in finalStates:
         return 1
     for symbol, next_state in transitions.get(actual_state, []):
-        print(actual_state)
         if next_state not in visited:
             if DFS(next_state, finalStates, transitions, visited) == 1:
                 return 1
@@ -161,6 +159,13 @@ def verificareAcceptance(startState, finalStates, transitions, isNfa):
             return -2
     return 0
 
+def printAutomata(sigma, states, startState, finalStates, transitions):
+    print("Sigma: ", sigma)
+    print("States: ", states)
+    print("startState: ", startState)
+    print("finalStates: ", finalStates)
+    print("transitions: ", transitions)
+
 def main():
     result = citire("nfa_config_file.txt")
     if result == -1:
@@ -172,12 +177,6 @@ def main():
         print("Automatul contine erori! Verificati mesajul anterior!")
         return
     isNfa = (finalCheck == 2)
-
-    print("Sigma: ", sigma)
-    print("States: ", states)
-    print("startState: ", startState)
-    print("finalStates: ", finalStates)
-    print("transitions: ", transitions)
     acceptance = verificareAcceptance(startState, finalStates, transitions, isNfa)
     if  acceptance == 1:
         print("Dfa Acceptat!")
@@ -189,5 +188,10 @@ def main():
         print("Nfa Invalid!")
     else:
         print("Eroare!")
+    userInput = input("Doriti sa vedeti variabilele stocate? (Y/N)\nUser:")
+    if userInput == "Y":
+        printAutomata(sigma, states, startState, finalStates, transitions)
+
+
 if __name__ == '__main__':
     main()
