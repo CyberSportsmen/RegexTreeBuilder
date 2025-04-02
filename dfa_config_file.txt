@@ -3,14 +3,12 @@ a
 b
 c
 
-
 End
 #
 
 #
 States:
-q0, S
-
+q0, F, S
 q1
 q3, F
 q2
@@ -22,9 +20,6 @@ End
 Transitions:
 q0, a, q1
 q0, b, q2
-q0, c, q3
-q1, b, q2
-q2, a, q3
 q1, c, q4
 q2, b, q4
 q3, a, q4

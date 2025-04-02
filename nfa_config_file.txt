@@ -5,7 +5,7 @@ c
 d
 End
 States:
-q0, S
+q0, S, F
 q1
 q2
 q3

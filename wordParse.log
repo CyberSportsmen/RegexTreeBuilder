@@ -1,43 +1,36 @@
-Input initial: abaaa
-Cuvantul partial de parsat: abaaa
-Sigma: {'a', 'c', 'b'}
+Input initial: bbaa
+Cuvantul partial de parsat: bbaa
+Sigma: {'c', 'b', 'a'}
 States: ['q0', 'q1', 'q3', 'q2', 'q4', 'q5']
 currentNodes: ['q0']
-finalStates: ['q3', 'q5']
-transitions: {'q0': [('a', 'q1'), ('b', 'q2'), ('c', 'q3')], 'q1': [('b', 'q2'), ('c', 'q4')], 'q2': [('a', 'q3'), ('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
+finalStates: ['q0', 'q3', 'q5']
+transitions: {'q0': [('a', 'q1'), ('b', 'q2')], 'q1': [('c', 'q4')], 'q2': [('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
 
-Cuvantul partial de parsat: baaa
-Sigma: {'a', 'c', 'b'}
-States: ['q0', 'q1', 'q3', 'q2', 'q4', 'q5']
-currentNodes: ['q1']
-finalStates: ['q3', 'q5']
-transitions: {'q0': [('a', 'q1'), ('b', 'q2'), ('c', 'q3')], 'q1': [('b', 'q2'), ('c', 'q4')], 'q2': [('a', 'q3'), ('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
-
-Cuvantul partial de parsat: aaa
-Sigma: {'a', 'c', 'b'}
+Cuvantul partial de parsat: baa
+Sigma: {'c', 'b', 'a'}
 States: ['q0', 'q1', 'q3', 'q2', 'q4', 'q5']
 currentNodes: ['q2']
-finalStates: ['q3', 'q5']
-transitions: {'q0': [('a', 'q1'), ('b', 'q2'), ('c', 'q3')], 'q1': [('b', 'q2'), ('c', 'q4')], 'q2': [('a', 'q3'), ('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
+finalStates: ['q0', 'q3', 'q5']
+transitions: {'q0': [('a', 'q1'), ('b', 'q2')], 'q1': [('c', 'q4')], 'q2': [('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
 
 Cuvantul partial de parsat: aa
-Sigma: {'a', 'c', 'b'}
-States: ['q0', 'q1', 'q3', 'q2', 'q4', 'q5']
-currentNodes: ['q3']
-finalStates: ['q3', 'q5']
-transitions: {'q0': [('a', 'q1'), ('b', 'q2'), ('c', 'q3')], 'q1': [('b', 'q2'), ('c', 'q4')], 'q2': [('a', 'q3'), ('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
-
-Cuvantul partial de parsat: a
-Sigma: {'a', 'c', 'b'}
+Sigma: {'c', 'b', 'a'}
 States: ['q0', 'q1', 'q3', 'q2', 'q4', 'q5']
 currentNodes: ['q4']
-finalStates: ['q3', 'q5']
-transitions: {'q0': [('a', 'q1'), ('b', 'q2'), ('c', 'q3')], 'q1': [('b', 'q2'), ('c', 'q4')], 'q2': [('a', 'q3'), ('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
+finalStates: ['q0', 'q3', 'q5']
+transitions: {'q0': [('a', 'q1'), ('b', 'q2')], 'q1': [('c', 'q4')], 'q2': [('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
 
-Cuvantul partial de parsat: 
-Sigma: {'a', 'c', 'b'}
+Cuvantul partial de parsat: a
+Sigma: {'c', 'b', 'a'}
 States: ['q0', 'q1', 'q3', 'q2', 'q4', 'q5']
 currentNodes: ['q5']
-finalStates: ['q3', 'q5']
-transitions: {'q0': [('a', 'q1'), ('b', 'q2'), ('c', 'q3')], 'q1': [('b', 'q2'), ('c', 'q4')], 'q2': [('a', 'q3'), ('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
+finalStates: ['q0', 'q3', 'q5']
+transitions: {'q0': [('a', 'q1'), ('b', 'q2')], 'q1': [('c', 'q4')], 'q2': [('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
+
+Cuvantul partial de parsat: 
+Sigma: {'c', 'b', 'a'}
+States: ['q0', 'q1', 'q3', 'q2', 'q4', 'q5']
+currentNodes: ['q4']
+finalStates: ['q0', 'q3', 'q5']
+transitions: {'q0': [('a', 'q1'), ('b', 'q2')], 'q1': [('c', 'q4')], 'q2': [('b', 'q4')], 'q3': [('a', 'q4')], 'q4': [('a', 'q5')], 'q5': [('a', 'q4')]}
 

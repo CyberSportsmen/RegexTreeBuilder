@@ -39,10 +39,10 @@ def citesteStates(lines):
             for token in lineParse: # verificam daca este start sau finish, pentru flag-uri respectiva
                 token = token.strip(',')
                 token = token.strip()
-                if(token == "S" and startState != None):
+                if token == "S" and startState is not None:
                     print("Prea multe start States! (max allowed = 1)")
                     return -1
-                if(token == "S" and startState == None):
+                if token == "S" and startState is None:
                     startState = lineParse[0].strip(',').strip()
                 if(token == "F"):
                     finalStates.append(lineParse[0].strip(',').strip())
@@ -131,7 +131,8 @@ def verificare(sigma, states, startState, finalStates, transitions):
         if (len(v) != len(set(v))):
             print("Automatul este NFA!")
             return 2
-    return 1;
+    return 1
+
 
 def DFS(actual_state, finalStates, transitions, visited):
     visited[actual_state] = True
@@ -156,7 +157,6 @@ def verificareAcceptance(startState, finalStates, transitions, isNfa):
             return -1
         else:
             return -2
-    return 0
 
 def printAutomata(sigma, states, startState, finalStates, transitions):
     print("Sigma: ", sigma)
@@ -200,7 +200,6 @@ def cuvantParse(input, Sigma, states, currentNodes, finalStates, transitions):
                 if cuvant == currentWord:
                     nextNodes.append(nodUrmator) # tinand cont ca i-am facut o copie ar trebui
     return cuvantParse(input, Sigma, states, nextNodes, finalStates, transitions)
-
 
 
 def main():
