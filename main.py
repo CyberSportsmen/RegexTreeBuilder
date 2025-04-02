@@ -86,15 +86,15 @@ def citire(filename):
         for line in linii:
             line = line.strip()
             lineIndex += 1
-            if len(line) == 0 or line.startswith("#"):
-                continue
-            else:
+            if len(line) != 0 and not line.startswith("#"):
                 if line == "Sigma:":
                     sigmaIndex = lineIndex
                 elif line == "States:":
                     statesIndex = lineIndex
                 elif line == "Transitions:":
                     transitionsIndex = lineIndex
+            else:
+                continue
         # acum avem indecsii la linii
         # verificam daca ii avem pe toti, daca nu aruncam o eroare
         if sigmaIndex == -1 or statesIndex == -1 or transitionsIndex == -1: # clar una din ele nu este, aruncam o eroare

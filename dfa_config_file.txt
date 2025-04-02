@@ -2,14 +2,18 @@ Sigma:
 a
 b
 c
+
+
 End
 #
+
 #
 States:
 q0, S
+
 q1
-q2
 q3, F
+q2
 q4
 q5, F
 End
