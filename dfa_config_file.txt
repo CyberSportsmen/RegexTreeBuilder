@@ -2,12 +2,11 @@ Sigma:
 a
 b
 c
-c
 End
 #
 #
 States:
-q0, S, F
+q0, S
 q1
 q2
 q3, F

@@ -165,8 +165,46 @@ def printAutomata(sigma, states, startState, finalStates, transitions):
     print("finalStates: ", finalStates)
     print("transitions: ", transitions)
 
+def cuvantParse(input, Sigma, states, currentNodes, finalStates, transitions):
+    with open("wordParse.log", "a") as f:
+        f.write("Cuvantul partial de parsat: " + input + "\n")
+        f.write("Sigma: " + repr(Sigma) + "\n")
+        f.write("States: " + repr(states) + "\n")
+        f.write("currentNodes: " + repr(currentNodes) + "\n")
+        f.write("finalStates: " + repr(finalStates) + "\n")
+        f.write("transitions: " + repr(transitions) + "\n\n")
+    currentWord = ""
+    for acceptedWord in Sigma:
+        if input.startswith(acceptedWord):
+            input = input.removeprefix(acceptedWord)
+            currentWord = acceptedWord
+            break
+    if currentWord == "":
+        if input == "":
+            for finalState in finalStates:
+                if finalState in currentNodes:
+                    return 1  # cuvant acceptat
+        if input != "":
+            return -1
+        return 0
+    if currentNodes == []:
+        print("Parsing Failed!")
+        return -1
+    #print(currentNodes)
+    nextNodes = []
+    for currentNode in currentNodes[:]: # trebuie o copie ca sa nu se strice cand stergem
+        # tehnic e redundant daca fac cu 2 doar ca nu imi doresc erori de memorie deloc
+        # currentNodes.remove(currentNode) # il scoatem pentru ca obligatoriu va merge in starea urmatoare
+        if currentNode in transitions.keys():
+            for cuvant, nodUrmator in transitions[currentNode]:
+                if cuvant == currentWord:
+                    nextNodes.append(nodUrmator) # tinand cont ca i-am facut o copie ar trebui
+    return cuvantParse(input, Sigma, states, nextNodes, finalStates, transitions)
+
+
+
 def main():
-    result = citire("nfa_config_file.txt")
+    result = citire("dfa_config_file.txt")
     if result == -1:
         print("Automatul contine erori! Verificati mesajul anterior!")
         return
@@ -183,14 +221,32 @@ def main():
         print("Nfa Acceptat!")
     elif acceptance == -1:
         print("Dfa Invalid!")
+        return -1
     elif acceptance == -2:
         print("Nfa Invalid!")
+        return -2
     else:
         print("Eroare!")
-    userInput = input("Doriti sa vedeti variabilele stocate? (Y/N)\nUser:")
-    if userInput == "Y":
-        printAutomata(sigma, states, startState, finalStates, transitions)
-
+        return -3
+    #userInput = input("Doriti sa vedeti variabilele stocate? (Y/N)\nUser:")
+    #if userInput == "Y":
+    #    printAutomata(sigma, states, startState, finalStates, transitions)
+    userInput = input("Introduceti un cuvant pentru limbaj!\nUser:")
+    with open("wordParse.log", "w") as f:
+        f.write("Input initial: " + userInput + "\n")
+    raspuns = cuvantParse(input=userInput, Sigma=sigma,states = states, currentNodes = [startState], finalStates=finalStates, transitions=transitions)
+    if raspuns == 1:
+        if isNfa == 1:
+            print("Nfa-ul accepta cuvantul!")
+        else:
+            print("Dfa-ul accepta cuvantul!")
+    elif raspuns == 0:
+        if isNfa == 1:
+            print("Nfa-ul nu accepta cuvantul!")
+        else:
+            print("Dfa-ul nu accepta cuvantul!")
+    else:
+        print("Eroare! Verifica mesajul anterior sau logs!")
 
 if __name__ == '__main__':
     main()
