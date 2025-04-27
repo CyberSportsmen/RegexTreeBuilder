@@ -181,7 +181,7 @@ def printAutomata(sigma, states, startState, finalStates, transitions):
     print("transitions: ", transitions)
 
 def cuvantParse(input, Sigma, states, currentNodes, finalStates, transitions):
-    with open("wordParse.log", "a") as f:
+    with open("wordParse.log", "w") as f:
         f.write("Cuvantul partial de parsat: " + input + "\n")
         f.write("Sigma: " + repr(Sigma) + "\n")
         f.write("States: " + repr(states) + "\n")
