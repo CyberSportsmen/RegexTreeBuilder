@@ -97,7 +97,7 @@ def to_infix(node):
         return f"({to_infix(node.left)}{node.value}{to_infix(node.right)})"
     return node.value
 
-# Nicely print the syntax tree using ASCII branches
+# print the syntax tree using ASCII branches
 def print_tree(node, prefix="", is_last=True):
     # Print current node
     branch = "└── " if is_last else "├── "
@@ -114,22 +114,108 @@ def print_tree(node, prefix="", is_last=True):
         new_prefix = prefix + ("    " if is_last else "│   ")
         print_tree(child, new_prefix, last)
 
-def create_dfa(regex):
-    prefix = infix_to_prefix(regex)
-    print(prefix)
+timesCalled = 0
+
+def create_symbol_nfa(symbol):
+    """Return an NFA that recognizes a single symbol."""
+    global timesCalled
+    timesCalled += 1
     nfa = {
-        "states": {"Start", "End"},
-        "alphabet": {"Start", "End", "Lambda"}, # no other sigma should be more than 1 character in length, so these 3 are special
-        "transitions":
-            {
-                "Start" :
-                {"Lambda" : {"End"}}
-            },
-        "start": "Start",
-        "accept": {"End"}
+        "states": {f"Start{timesCalled}{symbol}", f"End{timesCalled}{symbol}"},
+        "alphabet": {symbol},
+        "transitions": {
+            f"Start{timesCalled}{symbol}" : {
+                symbol : {f"End{timesCalled}{symbol}"}
+            }
+        },
+        "start": f"Start{timesCalled}{symbol}",
+        "accept": {f"End{timesCalled}{symbol}"},
     }
-    dfa = config.convert_nfa_to_dfa(nfa)
-    return dfa
+    print(nfa)
+    return nfa
+
+def nfa_concatenate(nfa1, nfa2):
+    """Return the concatenation of nfa1 and nfa2."""
+    # Add lambda transitions from nfa1's accept states to nfa2's start
+    lambda_transitions = {}
+    nfa1_accept_states = nfa1.get("accept")
+    nfa2_start = nfa2.get("start")
+
+    for accept_state in nfa1_accept_states:
+        lambda_transitions.setdefault(accept_state, {}).setdefault("Lambda", set()).add(nfa2_start)
+
+    new_nfa = {
+        "states": nfa1.get("states") | nfa2.get("states"),  # union of states
+        "alphabet": nfa1.get("alphabet") | nfa2.get("alphabet") | {"Lambda"},  # union of alphabets plus "Lambda"
+        "transitions": {**nfa1.get("transitions"), **nfa2.get("transitions"), **lambda_transitions},
+        "start": nfa1.get("start"),
+        "accept": nfa2.get("accept"),
+    }
+    print(new_nfa)
+    return new_nfa
+
+
+def nfa_alternate(nfa1, nfa2):
+    """Return the alternation (union) of nfa1 and nfa2."""
+    global timesCalled
+    timesCalled += 1
+    raise NotImplementedError
+
+def nfa_kleene(nfa):
+    """Return the Kleene star of nfa."""
+    global timesCalled
+    timesCalled += 1
+    raise NotImplementedError
+
+def nfa_plus(nfa):
+    """Return the one-or-more (plus) of nfa."""
+    global timesCalled
+    timesCalled += 1
+    raise NotImplementedError
+
+def nfa_optional(nfa):
+    """Return the zero-or-one (optional) of nfa."""
+    global timesCalled
+    timesCalled += 1
+    raise NotImplementedError
+
+# Create epsilon-NFA from regex by traversing syntax tree
+def create_lambda_nfa(regex):
+    prefix = infix_to_prefix(regex)
+    tree = build_tree(prefix)
+    global timesCalled
+    timesCalled = 0
+    def traverse(node):
+        # Leaf: single symbol
+        if node.value not in ['.', '|', '*', '+', '?']:
+            return create_symbol_nfa(node.value)
+
+        # Unary operators
+        if node.value == '*':
+            child_nfa = traverse(node.left)
+            return nfa_kleene(child_nfa)
+        if node.value == '+':
+            child_nfa = traverse(node.left)
+            return nfa_plus(child_nfa)
+        if node.value == '?':
+            child_nfa = traverse(node.left)
+            return nfa_optional(child_nfa)
+
+        # Binary operators
+        left_nfa = traverse(node.left)
+        right_nfa = traverse(node.right)
+        if node.value == '.':
+            return nfa_concatenate(left_nfa, right_nfa)
+        if node.value == '|':
+            return nfa_alternate(left_nfa, right_nfa)
+
+        raise ValueError(f"Unknown operator: {node.value}")
+
+    # Build the NFA
+    lambda_nfa = traverse(tree)
+    # Optionally convert to DFA:
+    # dfa = config.convert_nfa_to_dfa(lambda_nfa)
+    return lambda_nfa
 
 
 def tester():
@@ -138,10 +224,11 @@ def tester():
         for testcase in data:
             name = testcase.get("name")
             regex = testcase.get("regex")
-            print(regex)
             test_strings = testcase.get("test_strings")
-            dfa = create_dfa(regex)
-            # print(dfa)
+            # lambda_nfa = create_lambda_nfa(regex)
+            # print(lambda_nfa)
+            timesCalled = 0
+            create_lambda_nfa(regex)
 
 if __name__ == '__main__':
     tester()
