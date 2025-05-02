@@ -97,8 +97,8 @@ def to_infix(node):
         return f"({to_infix(node.left)}{node.value}{to_infix(node.right)})"
     return node.value
 
-# print the syntax tree using ASCII branches
 def print_tree(node, prefix="", is_last=True):
+    """prints the syntax tree using ASCII branches"""
     # Print current node
     branch = "└── " if is_last else "├── "
     print(f"{prefix}{branch}{node.value}")
@@ -113,6 +113,20 @@ def print_tree(node, prefix="", is_last=True):
         last = (i == len(children) - 1)
         new_prefix = prefix + ("    " if is_last else "│   ")
         print_tree(child, new_prefix, last)
+
+def pretty_print_nfa(nfa):
+    for key in ('states', 'alphabet', 'start', 'accept'):
+        if key in nfa:
+            print(f"{key}: {nfa[key]}")
+    transitions = nfa.get('transitions', {})
+    print('transitions:')
+    for state, trans in transitions.items():
+        print(f"    {state}: {{", end='')
+        parts = []
+        for symbol, targets in trans.items():
+            parts.append(f"'{symbol}': {targets}")
+        print(', '.join(parts) + ' }')
+
 
 timesCalled = 0
 
@@ -131,7 +145,7 @@ def create_symbol_nfa(symbol):
         "start": f"Start{timesCalled}{symbol}",
         "accept": {f"End{timesCalled}{symbol}"},
     }
-    print(nfa)
+    #print(nfa)
     return nfa
 
 def nfa_concatenate(nfa1, nfa2):
@@ -151,7 +165,7 @@ def nfa_concatenate(nfa1, nfa2):
         "start": nfa1.get("start"),
         "accept": nfa2.get("accept"),
     }
-    print(new_nfa)
+    #print(new_nfa)
     return new_nfa
 
 
@@ -163,14 +177,26 @@ def nfa_alternate(nfa1, nfa2):
 
 def nfa_kleene(nfa):
     """Return the Kleene star of nfa."""
-    global timesCalled
-    timesCalled += 1
-    raise NotImplementedError
+    final_states = nfa.get("accept")
+    #print(nfa.get("transitions"))
+    transitions = nfa.get("transitions")
+    transitions[nfa.get("start")] = {**transitions[nfa.get("start")], "Lambda": nfa.get("accept")}
+    for final_state in final_states:
+         if final_state not in transitions.keys():
+             transitions[final_state] = {"Lambda": {nfa.get("start")}}
+         else:
+             transitions[final_state] = ({**transitions[final_state], "Lambda": {nfa.get("start")}})
+    new_nfa = {
+        "states": nfa.get("states"),
+        "alphabet": nfa.get("alphabet"),
+        "transitions": transitions,
+        "start": nfa.get("start"),
+        "accept": nfa.get("accept"),
+    }
+    return new_nfa
 
 def nfa_plus(nfa):
     """Return the one-or-more (plus) of nfa."""
-    global timesCalled
-    timesCalled += 1
     raise NotImplementedError
 
 def nfa_optional(nfa):
@@ -219,7 +245,7 @@ def create_lambda_nfa(regex):
 
 
 def tester():
-    with open("LFA-Assignment2_Regex_DFA_v2.json") as f:
+    with open("tests_clone.json") as f:
         data = json.load(f)
         for testcase in data:
             name = testcase.get("name")
@@ -228,7 +254,8 @@ def tester():
             # lambda_nfa = create_lambda_nfa(regex)
             # print(lambda_nfa)
             timesCalled = 0
-            create_lambda_nfa(regex)
+            nfa = create_lambda_nfa(regex)
+            pretty_print_nfa(nfa)
 
 if __name__ == '__main__':
     tester()
