@@ -208,52 +208,71 @@ def nfa_alternate(nfa1, nfa2):
     }
     return new_nfa
 
+# fixed bug of return lambda not being added. REMINDME: I hate dictionaries
 def nfa_kleene(nfa):
-    """Return the Kleene star of nfa."""
-    final_states = nfa.get("accept")
-    transitions = nfa.get("transitions")
-    # adds a bypass from start to end (for 0 occurances acceptance)
-    transitions[nfa.get("start")] = {**transitions[nfa.get("start")], "Lambda": nfa.get("accept")}
-    # adds a bypass from end to start (for 1+ occurance acceptance)
-    for final_state in final_states:
-         if final_state not in transitions.keys():
-             transitions[final_state] = {"Lambda": {nfa.get("start")}}
-         else:
-             transitions[final_state] = ({**transitions[final_state], "Lambda": {nfa.get("start")}})
-    new_nfa = {
-        "states": nfa.get("states"),
-        "alphabet": nfa.get("alphabet"),
-        "transitions": transitions,
-        "start": nfa.get("start"),
-        "accept": nfa.get("accept"),
-    }
-    return new_nfa
+    """Return the zero-or-more (kleene star) of nfa."""
+    global timesCalled
+    timesCalled += 1
 
+    old_start   = nfa["start"]
+    old_accepts = set(nfa["accept"])
+    trans       = nfa.setdefault("transitions", {})
+    new_start  = f"Start*{timesCalled}"
+    new_accept = f"End*{timesCalled}"
+
+    states = set(nfa["states"]) | {new_start, new_accept}
+    trans.setdefault(new_start, {})
+    trans[new_start].setdefault("Lambda", set()).update({old_start, new_accept})
+
+    for fs in old_accepts:
+        trans.setdefault(fs, {})
+        trans[fs].setdefault("Lambda", set()).update({old_start, new_accept})
+    alphabet = set(nfa["alphabet"]) | {"Lambda"}
+    nfa = {
+        "states":      states,
+        "alphabet":    alphabet,
+        "transitions": trans,
+        "start":       new_start,
+        "accept":      {new_accept},
+    }
+    return nfa
+
+#copy paste practic de la kleene, evident
 def nfa_plus(nfa):
-    """Return the one-or-more (plus) of nfa."""
-    final_states = nfa.get("accept")
-    transitions = nfa.get("transitions")
-    # adds a bypass from end to start (for 1+ occurance acceptance)
-    for final_state in final_states:
-        if final_state not in transitions.keys():
-            transitions[final_state] = {"Lambda": {nfa.get("start")}}
-        else:
-            transitions[final_state] = ({**transitions[final_state], "Lambda": {nfa.get("start")}})
-    new_nfa = {
-        "states": nfa.get("states"),
-        "alphabet": nfa.get("alphabet"),
-        "transitions": transitions,
-        "start": nfa.get("start"),
-        "accept": nfa.get("accept"),
-    }
-    return new_nfa
+    """Return the one-or-more (plus) of nfa, using fresh start/end like Thompson."""
+    global timesCalled
+    timesCalled += 1
 
+    old_start   = nfa["start"]
+    old_accepts = set(nfa["accept"])
+    trans       = nfa.setdefault("transitions", {})
+    new_start  = f"Start+{timesCalled}"
+    new_accept = f"End+{timesCalled}"
+
+    states = set(nfa["states"]) | {new_start, new_accept}
+    trans.setdefault(new_start, {})
+    trans[new_start].setdefault("Lambda", set()).add(old_start)
+
+    for fs in old_accepts:
+        trans.setdefault(fs, {})
+        trans[fs].setdefault("Lambda", set()).update({old_start, new_accept})
+    alphabet = set(nfa["alphabet"]) | {"Lambda"}
+    nfa = {
+        "states":      states,
+        "alphabet":    alphabet,
+        "transitions": trans,
+        "start":       new_start,
+        "accept":      {new_accept},
+    }
+    return nfa
+
+# asta inca merge, doamne ajuta
 def nfa_optional(nfa):
     """Return the zero-or-one (optional) of nfa."""
     final_states = nfa.get("accept")
     transitions = nfa.get("transitions")
     # adds a bypass from start to end (for 0 occurances acceptance)
-    transitions[nfa.get("start")] = {**transitions[nfa.get("start")], "Lambda": nfa.get("accept")}
+    transitions[nfa["start"]].setdefault("Lambda", set()).update(nfa["accept"])
     new_nfa = {
         "states": nfa.get("states"),
         "alphabet": nfa.get("alphabet"),
@@ -304,8 +323,11 @@ def create_lambda_nfa(regex):
 
 
 def tester():
-    with open("LFA-Assignment2_Regex_DFA_v2.json") as f:
+    with open("tests_clone.json") as f:
         data = json.load(f)
+        directory = os.getcwd()
+        directory = os.path.join(directory, "graphs")
+        os.makedirs(directory, exist_ok=True)
         for testcase in data:
             name = testcase.get("name")
             print("Testing " + name)
@@ -315,15 +337,8 @@ def tester():
             timesCalled = 0
             lambda_nfa = create_lambda_nfa(regex)
             graph = parse_lambda_nfa_to_graph(lambda_nfa)
-            directory = os.getcwd()
-            directory = os.path.join(directory, "graphs")
-            os.makedirs(directory, exist_ok=True)
             graph.render(f'lambda_nfa_graph{name}', directory=directory, cleanup=True)
-            # pretty_print_nfa(lambda_nfa)
+            pretty_print_nfa(lambda_nfa)
 
 if __name__ == '__main__':
     tester()
-# class A, Class B, Class C, Class D
-# class B : A
-# Class C : A
-# class D : B, C

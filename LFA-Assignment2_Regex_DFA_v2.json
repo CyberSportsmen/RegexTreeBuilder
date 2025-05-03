@@ -31,7 +31,7 @@
   },
   {
     "name": "R4",
-    "regex": "(a|b)*abb",
+    "regex": "(a|b)+abb",
     "test_strings": [
       { "input": "abb", "expected": true },
       { "input": "aabb", "expected": true },
