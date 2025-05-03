@@ -399,14 +399,14 @@ def convert_nfa_to_dfa(nfa_config):
 global count
 global map_frozenset_to_string
 
-def convert_frozenset_to_string(fs):
-    global count
-    count += 1
-    global map_frozenset_to_string
-    map_frozenset_to_string[fs] = str(count)
-    return str(count)
 
 def convert_dfa_to_dfa_dict(dfa_config):
+    def convert_frozenset_to_string(fs):
+        global count
+        count += 1
+        global map_frozenset_to_string
+        map_frozenset_to_string[fs] = str(count)
+        return str(count)
     global count
     global map_frozenset_to_string
     map_frozenset_to_string = {}
