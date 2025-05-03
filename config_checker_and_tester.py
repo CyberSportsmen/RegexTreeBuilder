@@ -181,7 +181,7 @@ def printAutomata(sigma, states, startState, finalStates, transitions):
     print("transitions: ", transitions)
 
 def cuvantParse(input, Sigma, states, currentNodes, finalStates, transitions):
-    with open("wordParse.log", "w") as f:
+    with open("wordParse.log", "a") as f:
         f.write("Cuvantul partial de parsat: " + input + "\n")
         f.write("Sigma: " + repr(Sigma) + "\n")
         f.write("States: " + repr(states) + "\n")
@@ -203,7 +203,6 @@ def cuvantParse(input, Sigma, states, currentNodes, finalStates, transitions):
             return -1
         return 0
     if currentNodes == []:
-        print("Parsing Failed!")
         return -1
     #print(currentNodes)
     nextNodes = []
@@ -308,6 +307,49 @@ def CheckWordValidity(word, sigma, states, start, accept, transitions):
                        finalStates=accept,
                        transitions=transitions) == 1
 
+def lambda_closure(state, transitions):
+    """Return the lambda closure of a single state."""
+    stack = [state]
+    closure = {state}
+    while stack:
+        s = stack.pop()
+        for dest in transitions.get(s, {}).get("Lambda", []):
+            if dest not in closure:
+                closure.add(dest)
+                stack.append(dest)
+    return closure
+
+def convert_lambda_nfa_to_nfa(lambda_nfa):
+    states = lambda_nfa["states"]
+    alphabet = lambda_nfa["alphabet"] - {"Lambda"} # I was today days old when I found out you can just - a dictionary
+    raw_trans = lambda_nfa["transitions"]
+    start = lambda_nfa["start"]
+    orig_accept = set(lambda_nfa["accept"])
+
+    closures = {s: lambda_closure(s, raw_trans) for s in states}
+
+    new_trans = {s: {} for s in states}
+    for s in states:
+        for a in alphabet:
+            dests = set()
+            for r in closures[s]:
+                for t in raw_trans.get(r, {}).get(a, []):
+                    dests |= closures[t]
+            if dests:
+                new_trans[s].setdefault(a, set()).update(dests)
+
+    #new accept states
+    new_accept = {s for s, cl in closures.items() if cl & orig_accept}
+
+    nfa = {
+        "states": states,
+        "alphabet": alphabet,
+        "transitions": new_trans,
+        "start": start,
+        "accept": new_accept,
+    }
+    return nfa
+
 def convert_nfa_to_dfa(nfa_config):
     alphabet = nfa_config["alphabet"]
     transitions = nfa_config["transitions"]
@@ -354,15 +396,53 @@ def convert_nfa_to_dfa(nfa_config):
     }
     return dfa
 
+global count
+global map_frozenset_to_string
+
+def convert_frozenset_to_string(fs):
+    global count
+    count += 1
+    global map_frozenset_to_string
+    map_frozenset_to_string[fs] = str(count)
+    return str(count)
+
+def convert_dfa_to_dfa_dict(dfa_config):
+    global count
+    global map_frozenset_to_string
+    map_frozenset_to_string = {}
+    count = 0
+    states = {convert_frozenset_to_string(x) for x in dfa_config["states"]}
+    alphabet = dfa_config["alphabet"]
+    accept = {map_frozenset_to_string[x] for x in dfa_config["accept"]}
+    start = map_frozenset_to_string[dfa_config["start"]]
+    transitions = {}
+    for old_src, symbol_map in dfa_config["transitions"].items():
+        src_name = map_frozenset_to_string[old_src]
+        transitions[src_name] = {}
+        for sym, old_dest in symbol_map.items():
+            dest_name = map_frozenset_to_string[old_dest]
+            transitions[src_name][sym] = dest_name
+    dfa = {
+        "states": states,
+        "alphabet": alphabet,
+        "transitions": transitions,
+        "start": start,
+        "accept": accept
+    }
+    return dfa
+
+
 def CheckWordBetter(word, new_automata):
     sigma, states, start, accept, transitions_old = convert_to_old_automata_format(new_automata)
     # before parsing check if old format automata is valid
-    if verificareNoDebug(sigma, states, start, accept, transitions_old) < 1:
-        return False
+    # if verificareNoDebug(sigma, states, start, accept, transitions_old) < 1:
+    #     return False
     if cuvantParse(input=word, Sigma=sigma, states=states, currentNodes=[start], finalStates=accept, transitions=transitions_old) == 1:
         return True
     else:
         return False
+
+
 
 # -----------code below not to be used in a module-------------
 def test():

@@ -117,7 +117,7 @@ def print_tree(node, prefix="", is_last=True):
         new_prefix = prefix + ("    " if is_last else "│   ")
         print_tree(child, new_prefix, last)
 
-def pretty_print_nfa(nfa):
+def pretty_print_automata(nfa):
     for key in ('states', 'alphabet', 'start', 'accept'):
         if key in nfa:
             print(f"{key}: {nfa[key]}")
@@ -285,7 +285,6 @@ def nfa_optional(nfa):
 # Create epsilon-NFA from regex by traversing syntax tree
 def create_lambda_nfa(regex):
     prefix = infix_to_prefix(regex)
-    print(prefix)
     tree = build_tree(prefix)
     global timesCalled
     timesCalled = 0
@@ -321,24 +320,41 @@ def create_lambda_nfa(regex):
     # dfa = config.convert_nfa_to_dfa(lambda_nfa)
     return lambda_nfa
 
+def test(testcase):
+    directory = os.getcwd()
+    directory = os.path.join(directory, "graphs")
+    os.makedirs(directory, exist_ok=True)
+
+    name = testcase.get("name")
+    print("Testing " + name)
+    regex = testcase.get("regex")
+    test_strings = testcase.get("test_strings")
+    global timesCalled
+    timesCalled = 0
+    lambda_nfa = create_lambda_nfa(regex)
+    nfa = config.convert_lambda_nfa_to_nfa(lambda_nfa)
+    dfa = config.convert_nfa_to_dfa(nfa)
+    dfa = config.convert_dfa_to_dfa_dict(dfa)
+    graph = parse_lambda_nfa_to_graph(dfa)
+    graph.render(f'dfa_graph{name}', directory=directory, cleanup=True)
+    with open("wordParse.log", "a") as f:
+        f.write(f"-------------Test: {name}-------------------" + "\n")
+    for x in test_strings:
+        input_string = x.get("input")
+        expected_bool = x.get("expected")
+        with open("wordParse.log", "a") as f:
+            f.write("---------------TESTCASE de parsat: " + input_string + "------------------" + "\n")
+        result = config.CheckWordBetter(input_string, dfa)
+        if result != expected_bool:
+            print(input_string, "Expected:", expected_bool, "Got:", result)
 
 def tester():
     with open("LFA-Assignment2_Regex_DFA_v2.json") as f:
         data = json.load(f)
-        directory = os.getcwd()
-        directory = os.path.join(directory, "graphs")
-        os.makedirs(directory, exist_ok=True)
+        with open("wordParse.log", "w") as f:
+            f.write("")
         for testcase in data:
-            name = testcase.get("name")
-            print("Testing " + name)
-            regex = testcase.get("regex")
-            # test_strings = testcase.get("test_strings")
-            global timesCalled
-            timesCalled = 0
-            lambda_nfa = create_lambda_nfa(regex)
-            graph = parse_lambda_nfa_to_graph(lambda_nfa)
-            graph.render(f'lambda_nfa_graph{name}', directory=directory, cleanup=True)
-            #pretty_print_nfa(lambda_nfa)
+            test(testcase)
 
 if __name__ == '__main__':
     tester()

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "R1",
+    "regex": "(a|b)c+",
+    "test_strings": [
+      { "input": "", "expected": true },
+      { "input": "a", "expected": true },
+      { "input": "aaaa", "expected": true },
+      { "input": "b", "expected": false }
+    ]
+  }
+]
