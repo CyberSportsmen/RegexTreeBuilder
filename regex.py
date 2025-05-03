@@ -1,6 +1,6 @@
 import json
 import os
-
+import sys
 import config_checker_and_tester as config
 from graphviz import Digraph
 
@@ -324,7 +324,7 @@ def test(testcase):
     directory = os.getcwd()
     directory = os.path.join(directory, "graphs")
     os.makedirs(directory, exist_ok=True)
-
+    ok = True
     name = testcase.get("name")
     print("Testing " + name)
     regex = testcase.get("regex")
@@ -346,15 +346,33 @@ def test(testcase):
             f.write("---------------TESTCASE de parsat: " + input_string + "------------------" + "\n")
         result = config.CheckWordBetter(input_string, dfa)
         if result != expected_bool:
+            ok = False
             print(input_string, "Expected:", expected_bool, "Got:", result)
+    return ok
 
 def tester():
-    with open("LFA-Assignment2_Regex_DFA_v2.json") as f:
+    if len(sys.argv) < 2:
+        print("Usage: python3 regex.py <path_to_json_file>")
+        sys.exit(1)
+
+    json_path = sys.argv[1]
+
+    with open(json_path) as f:
         data = json.load(f)
-        with open("wordParse.log", "w") as f:
-            f.write("")
+        with open("wordParse.log", "w") as log_file:
+            log_file.write("")
+        testcasenr = 0
+        allgood = True
         for testcase in data:
-            test(testcase)
+            testcasenr += 1
+            ok = test(testcase)
+            if ok:
+                print(f"Test {testcasenr} Passed!")
+            else:
+                allgood = False
+                print(f"Test {testcasenr} Failed!")
+    if allgood:
+        print("All tests passed!")
 
 if __name__ == '__main__':
     tester()
