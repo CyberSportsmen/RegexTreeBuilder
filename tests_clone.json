@@ -1,7 +1,7 @@
 [
   {
     "name": "R1",
-    "regex": "aa*",
+    "regex": "a?b?",
     "test_strings": [
       { "input": "", "expected": true },
       { "input": "a", "expected": true },

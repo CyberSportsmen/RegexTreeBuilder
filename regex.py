@@ -178,9 +178,10 @@ def nfa_alternate(nfa1, nfa2):
 def nfa_kleene(nfa):
     """Return the Kleene star of nfa."""
     final_states = nfa.get("accept")
-    #print(nfa.get("transitions"))
     transitions = nfa.get("transitions")
+    # adds a bypass from start to end (for 0 occurances acceptance)
     transitions[nfa.get("start")] = {**transitions[nfa.get("start")], "Lambda": nfa.get("accept")}
+    # adds a bypass from end to start (for 1+ occurance acceptance)
     for final_state in final_states:
          if final_state not in transitions.keys():
              transitions[final_state] = {"Lambda": {nfa.get("start")}}
@@ -197,13 +198,37 @@ def nfa_kleene(nfa):
 
 def nfa_plus(nfa):
     """Return the one-or-more (plus) of nfa."""
-    raise NotImplementedError
+    final_states = nfa.get("accept")
+    transitions = nfa.get("transitions")
+    # adds a bypass from end to start (for 1+ occurance acceptance)
+    for final_state in final_states:
+        if final_state not in transitions.keys():
+            transitions[final_state] = {"Lambda": {nfa.get("start")}}
+        else:
+            transitions[final_state] = ({**transitions[final_state], "Lambda": {nfa.get("start")}})
+    new_nfa = {
+        "states": nfa.get("states"),
+        "alphabet": nfa.get("alphabet"),
+        "transitions": transitions,
+        "start": nfa.get("start"),
+        "accept": nfa.get("accept"),
+    }
+    return new_nfa
 
 def nfa_optional(nfa):
     """Return the zero-or-one (optional) of nfa."""
-    global timesCalled
-    timesCalled += 1
-    raise NotImplementedError
+    final_states = nfa.get("accept")
+    transitions = nfa.get("transitions")
+    # adds a bypass from start to end (for 0 occurances acceptance)
+    transitions[nfa.get("start")] = {**transitions[nfa.get("start")], "Lambda": nfa.get("accept")}
+    new_nfa = {
+        "states": nfa.get("states"),
+        "alphabet": nfa.get("alphabet"),
+        "transitions": transitions,
+        "start": nfa.get("start"),
+        "accept": nfa.get("accept"),
+    }
+    return new_nfa
 
 # Create epsilon-NFA from regex by traversing syntax tree
 def create_lambda_nfa(regex):
@@ -253,9 +278,14 @@ def tester():
             test_strings = testcase.get("test_strings")
             # lambda_nfa = create_lambda_nfa(regex)
             # print(lambda_nfa)
+            global timesCalled
             timesCalled = 0
             nfa = create_lambda_nfa(regex)
             pretty_print_nfa(nfa)
 
 if __name__ == '__main__':
     tester()
+# class A, Class B, Class C, Class D
+# class B : A
+# Class C : A
+# class D : B, C
