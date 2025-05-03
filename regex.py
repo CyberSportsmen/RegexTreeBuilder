@@ -323,7 +323,7 @@ def create_lambda_nfa(regex):
 
 
 def tester():
-    with open("tests_clone.json") as f:
+    with open("LFA-Assignment2_Regex_DFA_v2.json") as f:
         data = json.load(f)
         directory = os.getcwd()
         directory = os.path.join(directory, "graphs")
@@ -338,7 +338,7 @@ def tester():
             lambda_nfa = create_lambda_nfa(regex)
             graph = parse_lambda_nfa_to_graph(lambda_nfa)
             graph.render(f'lambda_nfa_graph{name}', directory=directory, cleanup=True)
-            pretty_print_nfa(lambda_nfa)
+            #pretty_print_nfa(lambda_nfa)
 
 if __name__ == '__main__':
     tester()
