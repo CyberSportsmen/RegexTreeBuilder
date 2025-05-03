@@ -1,7 +1,7 @@
 [
   {
     "name": "R1",
-    "regex": "a?b?",
+    "regex": "(a|b|c)",
     "test_strings": [
       { "input": "", "expected": true },
       { "input": "a", "expected": true },

@@ -1,5 +1,8 @@
 import json
+import os
+
 import config_checker_and_tester as config
+from graphviz import Digraph
 
 def precedence(op):
     # closure and repetition operators
@@ -128,6 +131,21 @@ def pretty_print_nfa(nfa):
         print(', '.join(parts) + ' }')
 
 
+def parse_lambda_nfa_to_graph(lambda_nfa):
+    dot = Digraph(format='png')
+    dot.attr(rankdir='LR')
+    dot.node('', shape='none', label='')
+    dot.edge('', lambda_nfa['start'], label='')
+    for state in lambda_nfa['states']:
+        shape = 'doublecircle' if state in lambda_nfa['accept'] else 'circle'
+        dot.node(state, shape=shape)
+    for src, paths in lambda_nfa['transitions'].items():
+        for symbol, dests in paths.items():
+            label = 'λ' if symbol == 'Lambda' else symbol
+            for dest in dests:
+                dot.edge(src, dest, label=label)
+    return dot
+
 timesCalled = 0
 
 def create_symbol_nfa(symbol):
@@ -173,7 +191,22 @@ def nfa_alternate(nfa1, nfa2):
     """Return the alternation (union) of nfa1 and nfa2."""
     global timesCalled
     timesCalled += 1
-    raise NotImplementedError
+    new_start = f"Start{timesCalled}_{nfa1.get('start')}+{nfa2.get('start')}"
+    new_end = f"End{timesCalled}_{nfa1.get('start')}+{nfa2.get('start')}"
+    added_transitions = {new_start: {"Lambda": {nfa1.get("start"), nfa2.get("start")}}}
+    for accepted_state in nfa1.get("accept") | nfa2.get("accept"):
+        added_transitions.setdefault(accepted_state, {}).setdefault("Lambda", set()).add(new_end)
+
+    new_transitions = {**nfa1.get("transitions"), **nfa2.get("transitions"), **added_transitions}
+
+    new_nfa = {
+        "states": nfa1.get("states") | nfa2.get("states") | {new_start} | {new_end},  # union of states
+        "alphabet": nfa1.get("alphabet") | nfa2.get("alphabet") | {"Lambda"},  # union of alphabets plus "Lambda"
+        "transitions": new_transitions,
+        "start": new_start,
+        "accept": {new_end},
+    }
+    return new_nfa
 
 def nfa_kleene(nfa):
     """Return the Kleene star of nfa."""
@@ -233,6 +266,7 @@ def nfa_optional(nfa):
 # Create epsilon-NFA from regex by traversing syntax tree
 def create_lambda_nfa(regex):
     prefix = infix_to_prefix(regex)
+    print(prefix)
     tree = build_tree(prefix)
     global timesCalled
     timesCalled = 0
@@ -270,18 +304,22 @@ def create_lambda_nfa(regex):
 
 
 def tester():
-    with open("tests_clone.json") as f:
+    with open("LFA-Assignment2_Regex_DFA_v2.json") as f:
         data = json.load(f)
         for testcase in data:
             name = testcase.get("name")
+            print("Testing " + name)
             regex = testcase.get("regex")
-            test_strings = testcase.get("test_strings")
-            # lambda_nfa = create_lambda_nfa(regex)
-            # print(lambda_nfa)
+            # test_strings = testcase.get("test_strings")
             global timesCalled
             timesCalled = 0
-            nfa = create_lambda_nfa(regex)
-            pretty_print_nfa(nfa)
+            lambda_nfa = create_lambda_nfa(regex)
+            graph = parse_lambda_nfa_to_graph(lambda_nfa)
+            directory = os.getcwd()
+            directory = os.path.join(directory, "graphs")
+            os.makedirs(directory, exist_ok=True)
+            graph.render(f'lambda_nfa_graph{name}', directory=directory, cleanup=True)
+            # pretty_print_nfa(lambda_nfa)
 
 if __name__ == '__main__':
     tester()
